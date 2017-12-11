@@ -31,14 +31,14 @@ class ContentExtractor(object):
     MAX_LINK_DENSITY = 0
     MIN_NODE_LENGTH = 0
     SIBLING_SCORE_THRESHOLD = 0
-    MIN_CONTENT_SCORE = 1 #40
+    MIN_CONTENT_SCORE = 40
 
     DATA_CANIDATE_ATTR = 'data-canidate'
     CONTENT_SCORE_ATTR = 'score'
-    MIN_PARAGRAPH_LENGTH = 1 #20
+    MIN_PARAGRAPH_LENGTH = 20
 
-    SCORE_CHARS_IN_PARAGRAPH = 1 #100
-    SCORE_WORDS_IN_PARAGRAPH = 1 #20
+    SCORE_CHARS_IN_PARAGRAPH = 100
+    SCORE_WORDS_IN_PARAGRAPH = 20
 
     DIV_TO_P_ELEMENTS_PATTERN = r'.<(?:blockquote|header|section|code|div|article|footer|aside|img|p|pre|dl|ol|ul)'
     DIV_TO_P_ELEMENTS_LIST = ['blockquote', 'header', 'section', 'code', 'div', 'article', 'footer', 'aside', 'img', 'p', 'pre', 'dl', 'ol', 'ul']
@@ -51,19 +51,15 @@ class ContentExtractor(object):
     POTENTIAL_CANIDATES = None
 
 
-    def __init__(self, html=None):
+    def __init__(self):
         self.parser = etree.HTMLParser(remove_blank_text=True)
-        if html:
-            self.tree = etree.parse(StringIO(html), self.parser)
-        else:
-            self.tree = None
         self.FLAG_STRIP_UNLIKELYS = True
         self.FLAG_WEIGHT_ATTRIBUTES = True
         self.FLAG_CLEAN_CONDITIONALLY = True
 
-    def find_scoreable_elements(self):
+    def find_scoreable_elements(self, elem_tree):
         scoreable_elements = []
-        for elem in self.tree.getroot().iter():
+        for elem in elem_tree.getroot().iter():
             if elem.tag in ['p', 'td', 'pre']:
                 scoreable_elements.append(elem)
             if elem.tag in ['div', 'article', 'section']:
@@ -91,7 +87,7 @@ class ContentExtractor(object):
             grand_parent = None
             if parent.getparent() is not None:
                 grand_parent = parent.getparent()
-            text = ''.join([child.text for child in elem if child.text]).strip()
+            text = ''.join([elem.text] + [child.text for child in elem if child.text]).strip()
             if len(text) < self.MIN_PARAGRAPH_LENGTH:
                 continue
             if not elem.get(self.CONTENT_SCORE_ATTR):
@@ -110,10 +106,10 @@ class ContentExtractor(object):
         return
 
     def remove_unlikely_canidates(self):
-        for canidate in self.tree.iter('footer', 'aside'):
+        for canidate in elem_tree.iter('footer', 'aside'):
             if canidate.get(self.CONTENT_SCORE_ATTR) and canidate.get(self.CONTENT_SCORE_ATTR) < self.MIN_CONTENT_SCORE and canidate.tag != 'article':
                 canidate.getparent().remove(canidate)
-        potential_canidates = self.tree.xpath('.//*[not(self::body) and (@class or @id or @style) and ((number(@score) < 40) or not(@score))]')
+        potential_canidates = elem_tree.xpath('.//*[not(self::body) and (@class or @id or @style) and ((number(@score) < 40) or not(@score))]')
         for canidate in potential_canidates:
             attrs_str = ' '.join(canidate.get('class'), canidate.get('id'), canidate.get('style'))
             unlikelys_regexp = re.compile(self.UNLIKELY_CANIDATES_PATTERN)
@@ -126,9 +122,9 @@ class ContentExtractor(object):
     def get_link_density(self, elem):
         return 0
 
-    def find_top_canidate(self):
+    def find_top_canidate(self, elem_tree):
         top_canidate = None
-        canidates = self.tree.xpath('//*[@data-canidate]')
+        canidates = elem_tree.xpath('//*[@data-canidate]')
         for canidate in canidates:
             score = float(canidate.get('score'))
             score = round(score  * (1 - self.get_link_density(canidate)))
@@ -136,7 +132,7 @@ class ContentExtractor(object):
                 top_canidate = canidate
         if top_canidate is None or top_canidate.tag == 'body':
             top_canidate = etree.Element('div')
-            top_canidate.text = self.tree.getroot().text
+            top_canidate.text = elem_tree.getroot().text
         if top_canidate.tag in ['tr', 'td']:
             if top_canidate.getparent():
                 top_canidate = top_canidate.getparent()
@@ -146,13 +142,18 @@ class ContentExtractor(object):
     def clean_article_content(self, article_content):
         raise NotImplementedError()
 
-    def extract_content(self):
-        scoreable_elems = self.find_scoreable_elements()
+    def extract_content(self, html=None):
+        if html:
+            elem_tree = etree.parse(StringIO(html), self.parser)
+        else:
+            return None
+
+        scoreable_elems = self.find_scoreable_elements(elem_tree)
         self.score_elements(scoreable_elems)
         # TODO: Implement below code
         # if self.FLAG_STRIP_UNLIKELYS:
         #     self.remove_unlikely_canidates()
-        top_canidate = self.find_top_canidate()
+        top_canidate = self.find_top_canidate(elem_tree)
 
         top_canidate_score = float(top_canidate.get(self.CONTENT_SCORE_ATTR))
 
@@ -197,4 +198,4 @@ class ContentExtractor(object):
         #         self.extract_content()
         #     else:
         #         return None
-        return article_content
+        return etree.tostring(article_content, encoding='unicode')

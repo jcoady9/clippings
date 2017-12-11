@@ -20,16 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from extractor import ContentExtractor
+from .extractor import ContentExtractor
 
 class Article(object):
 
-    def __init__(self, content=None):
-        self._url = None
-        self._title = None
-        self._pub_date = None
-        self._clip_date = None
-        self._author = None
+    def __init__(self, url=None, title=None, pub_date=None, author=None, content=None):
+        self._url = url
+        self._title = title
+        self._pub_date = pub_date
+        self._author = author
         self._content = content
 
     @property
@@ -49,7 +48,7 @@ class Article(object):
         return self._author
 
     @property
-    def article(self):
+    def content(self):
         return self._content
 
 
@@ -58,18 +57,18 @@ class Clipper(object):
     Parse article content from html.
     """
 
-    def __init__(self, html=None):
-        self._html = html
-        self.extractor = ContentExtractor(self._html)
+    def __init__(self):
+        self.extractor = ContentExtractor()
 
-    def clip(self):
+    def clip(self, html=None):
         """
         Parse for all the required information
         """
-        if not self._html:
+        if not html:
             return None
+        self._html = html
 
-        content = self.extractor.extract_content(self._html)
+        content = self.extractor.extract_content(html)
 
         article = Article(content)
 
