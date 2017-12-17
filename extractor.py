@@ -138,9 +138,14 @@ class ContentExtractor(object):
                 top_canidate = top_canidate.getparent()
         return top_canidate
 
-    # TODO: Implement Me.
     def clean_article_content(self, article_content):
-        raise NotImplementedError()
+        for elem in article_content.getroot().iter():
+            attributes = elem.attrib
+            if attributes.get(self.DATA_CANIDATE_ATTR):
+                del attributes[self.DATA_CANIDATE_ATTR]
+            if attributes.get(self.CONTENT_SCORE_ATTR):
+                del attributes[self.CONTENT_SCORE_ATTR]
+        return
 
     def extract_content(self, html=None):
         if html:
@@ -183,7 +188,7 @@ class ContentExtractor(object):
                     article_content.append(new_elem)
                 else:
                     article_content.append(sibling)
-            # TODO: self.clean_article_content(article_content)
+            self.clean_article_content(article_content)
 
         # TODO: Part 6
         # if not article_content.text or article_content < self.MIN_ARTICLE_LENGTH:

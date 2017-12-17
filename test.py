@@ -111,6 +111,27 @@ class ContentExtractorTests(unittest.TestCase):
         self.assertIsNotNone(top_canidate)
         self.assertEqual('div', top_canidate.tag)
 
+    def test_clean_article_content(self):
+
+        root = etree.HTML("""
+            <div>
+                <p data-canidate=\"true\" content_score=\"3.0\">
+                    <article data-canidate=\"true\" content_score=\"2.5\">
+                        The article content will go here and also be scored for how much content there is. Maybe, just maybe, this will get the highest score.
+                    </article>
+                </p>
+            </div>
+        """)
+        extractor = ContentExtractor()
+        tree = etree.ElementTree(root)
+
+        extractor.clean_article_content(tree)
+
+        for elem in tree.getroot().iter():
+            self.assertFalse(extractor.DATA_CANIDATE_ATTR in elem.keys())
+            self.assertFalse(extractor.CONTENT_SCORE_ATTR in elem.keys())
+
+
     # def test_extract_content(self):
     #     root = etree.HTML("""
     #         <body>
