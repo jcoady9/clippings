@@ -123,11 +123,11 @@ class ContentExtractorTests(unittest.TestCase):
             </div>
         """)
         extractor = ContentExtractor()
-        tree = etree.ElementTree(root)
+        # tree = etree.ElementTree(root)
 
-        extractor.clean_article_content(tree)
+        extractor.clean_article_content(root)
 
-        for elem in tree.getroot().iter():
+        for elem in root:
             self.assertFalse(extractor.DATA_CANIDATE_ATTR in elem.keys())
             self.assertFalse(extractor.CONTENT_SCORE_ATTR in elem.keys())
 

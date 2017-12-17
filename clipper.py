@@ -70,6 +70,6 @@ class Clipper(object):
 
         content = self.extractor.extract_content(html)
 
-        article = Article(content)
+        article = Article(content=content)
 
         return article

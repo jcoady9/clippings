@@ -139,7 +139,7 @@ class ContentExtractor(object):
         return top_canidate
 
     def clean_article_content(self, article_content):
-        for elem in article_content.getroot().iter():
+        for elem in article_content.iter():
             attributes = elem.attrib
             if attributes.get(self.DATA_CANIDATE_ATTR):
                 del attributes[self.DATA_CANIDATE_ATTR]
