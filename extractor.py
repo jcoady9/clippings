@@ -87,7 +87,7 @@ class ContentExtractor(object):
             grand_parent = None
             if parent.getparent() is not None:
                 grand_parent = parent.getparent()
-            text = ''.join([elem.text] + [child.text for child in elem if child.text]).strip()
+            text = ''.join([text for text in [elem.text] + [child.text for child in elem if child.text] if text is not None]).strip()
             if len(text) < self.MIN_PARAGRAPH_LENGTH:
                 continue
             if not elem.get(self.CONTENT_SCORE_ATTR):
