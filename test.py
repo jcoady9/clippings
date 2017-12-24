@@ -111,7 +111,7 @@ class ContentExtractorTests(unittest.TestCase):
         self.assertIsNotNone(top_canidate)
         self.assertEqual('div', top_canidate.tag)
 
-    def test_clean_article_content(self):
+    def test_clean_article_content_removes_data_canidate_and_score_attributes(self):
 
         root = etree.HTML("""
             <div>
@@ -123,37 +123,27 @@ class ContentExtractorTests(unittest.TestCase):
             </div>
         """)
         extractor = ContentExtractor()
-        # tree = etree.ElementTree(root)
-
         extractor.clean_article_content(root)
 
-        for elem in root:
+        for elem in root.iter():
             self.assertFalse(extractor.DATA_CANIDATE_ATTR in elem.keys())
             self.assertFalse(extractor.CONTENT_SCORE_ATTR in elem.keys())
 
+    def test_clean_article_content_removes_junk_elements(self):
+        element = etree.HTML("""
+            <div>
+                <p>This should be the only element left after cleaning...</p>
+                <input type=\"submit\" value=\"Sumbit Me!\">
+                <button type=\"button\">Click Me!</button>
+                <canvas id=\"canvas-stuff\"></canvas>
+            </div>
+        """)
 
-    # def test_extract_content(self):
-    #     root = etree.HTML("""
-    #         <body>
-    #             <div>
-    #                 <p>Stuff and things.</p>
-    #                 <p>Some text goes here, and will be scored.</p>
-    #                 <p>
-    #                     <article>
-    #                         The article content will go here and also be scored for how much content there is. Maybe, just maybe, this will get the highest score.
-    #                     </article>
-    #                 </p>
-    #             </div>
-    #         </body>
-    #     """)
-    #
-    #     extractor = ContentExtractor()
-    #     tree = etree.ElementTree(root)
-    #
-    #     content = extractor.extract_content()
-    #
-    #     self.assertIsNotNone(content)
-    #     self.assertTrue('div', content.tag)
+        extractor = ContentExtractor()
+        extractor.clean_article_content(element)
+
+        for elem in element.iter():
+            self.assertTrue(elem.tag not in extractor.JUNK_ELEMENTS)
 
 if __name__ == '__main__':
     unittest.main()

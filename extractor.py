@@ -40,6 +40,7 @@ class ContentExtractor(object):
     SCORE_CHARS_IN_PARAGRAPH = 100
     SCORE_WORDS_IN_PARAGRAPH = 20
 
+    JUNK_ELEMENTS = ['input', 'button', 'nav', 'object', 'canvas']
     DIV_TO_P_ELEMENTS_PATTERN = r'.<(?:blockquote|header|section|code|div|article|footer|aside|img|p|pre|dl|ol|ul)'
     DIV_TO_P_ELEMENTS_LIST = ['blockquote', 'header', 'section', 'code', 'div', 'article', 'footer', 'aside', 'img', 'p', 'pre', 'dl', 'ol', 'ul']
     UNLIKELY_CANIDATES_PATTERN = r'display\s*:\s*none|ignore|\binfos?\b|annoy|clock|date|time|author|intro|hidd?e|about|archive|\bprint|bookmark|tags|tag-list|share|search|social|robot|published|combx|comment|mast(?:head)|subscri|community|category|disqus|extra|head|head(?:er|note)|floor|foot(?:er|note)|menu|tool\b|function|nav|remark|rss|shoutbox|widget|meta|banner|sponsor|adsense|inner-?ad|ad-|sponsor|\badv\b|\bads\b|agr?egate?|pager|sidebar|popup|tweet|twitter'
@@ -145,6 +146,11 @@ class ContentExtractor(object):
                 del attributes[self.DATA_CANIDATE_ATTR]
             if attributes.get(self.CONTENT_SCORE_ATTR):
                 del attributes[self.CONTENT_SCORE_ATTR]
+
+        for elem in article_content.iter():
+            if elem.tag in self.JUNK_ELEMENTS:
+                parent = elem.getparent()
+                parent.remove(elem)
         return
 
     def extract_content(self, html=None):
