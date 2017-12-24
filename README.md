@@ -1,16 +1,64 @@
 # Clippings
 
-Extract interesting content from articles on the web without all the ads.
+Extract the interesting stuff from articles on the web minus the ads. This project was inspired and influenced by [php-readability](https://github.com/j0k3r/php-readability).
+
+**Please note this project is still in its early stages.**
 
 ## Installation
 
-TODO: Write installation section
+I haven't written the setup.py for this project yet so for now you can add this package as a git submodule to your project.
+
+```
+
+git clone https://github.com/jcoady9/clippings.git
+
+cd clippings
+
+pip install -r requirements.txt
+
+cd project
+
+git submodule add ../clippings
+
+```
 
 ## Usage
 
 NOTE: This library does not make any HTTP requests, you will need make the request using another library such as [requests](https://github.com/requests/requests).
 
-TODO: Write rest of usage section
+```python
+
+import requests
+
+from clippings.clipper import Clipper
+
+r = requests.get('https://www.designluck.com/friendship/')
+
+html = r.text
+
+clipper = Clipper()
+
+article = clipper.clip(html)
+
+print(article.content)
+
+# <div class="clippings-content">
+#       <p class="blog_single ">&#13;
+# 		<!--nav>
+# 								</nav-->
+# 		<p id="post-4503" class="post-4503 post type-post status-publish format-standard hentry category-humanity category-library">
+#        <header>
+#            <h1>The Right Kind of Friendship</h1>
+#        </header><hr/>
+#        <p><span style="font-weight: 400;">At age 17, Aristotle enrolled in the Platonic Academy. He would stay there for 20 years.</span></p>
+#        <p><span style="font-weight: 400;">Founded by the father of Western philosophy, the Greek philosopher Plato,
+#        .......
+
+```
+
+## Contributing
+
+If you'd like to contribute, please feel free to fork this repository.
 
 ## License
 
