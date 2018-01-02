@@ -80,6 +80,9 @@ class ContentExtractor(object):
                         parent.replace(elem, new_elem)
         return scoreable_elements
 
+    def get_inner_text(self, elem):
+        return ''.join([text for text in [elem.text] + [child.text for child in elem if child.text] if text is not None]).strip()
+
     def score_elements(self, scoreable_elems):
         for elem in scoreable_elems:
             parent = elem.getparent()
@@ -88,7 +91,7 @@ class ContentExtractor(object):
             grand_parent = None
             if parent.getparent() is not None:
                 grand_parent = parent.getparent()
-            text = ''.join([text for text in [elem.text] + [child.text for child in elem if child.text] if text is not None]).strip()
+            text = self.get_inner_text(elem)
             if len(text) < self.MIN_PARAGRAPH_LENGTH:
                 continue
             if not elem.get(self.CONTENT_SCORE_ATTR):
@@ -119,9 +122,15 @@ class ContentExtractor(object):
                 canidate.getparent().remove(canidate)
         return
 
-    # TODO: Implement Me.
     def get_link_density(self, elem):
-        return 0
+        all_text_len = len(self.get_inner_text(elem))
+        link_text_len = 0
+        if all_text_len == 0:
+            return 0
+        for a in elem.iter('a'):
+            if a.text is not None:
+                link_text_len += len(a.text)
+        return link_text_len / all_text_len
 
     def find_top_canidate(self, elem_tree):
         top_canidate = None

@@ -11,6 +11,38 @@ def element_tree_from_string(html):
 
 class ContentExtractorTests(unittest.TestCase):
 
+    def test_get_inner_text_without_text(self):
+        element = etree.Element('p')
+        child1 = etree.SubElement(element, 'a')
+        extractor = ContentExtractor()
+        inner_text = extractor.get_inner_text(element)
+        self.assertEqual(inner_text, '')
+
+    def test_get_inner_text_with_text(self):
+        element = etree.Element('p')
+        child1 = etree.SubElement(element, 'a')
+        element.text = 'Stuff '
+        child1.text = 'And Things'
+        extractor = ContentExtractor()
+        inner_text = extractor.get_inner_text(element)
+        self.assertEqual(inner_text, 'Stuff And Things')
+
+    def test_get_link_density_without_text(self):
+        element = etree.Element('p')
+        child1 = etree.SubElement(element, 'a')
+        extractor = ContentExtractor()
+        link_density = extractor.get_link_density(element)
+        self.assertEqual(link_density, 0)
+
+    def test_get_link_density_with_text(self):
+        element = etree.Element('p')
+        child1 = etree.SubElement(element, 'a')
+        element.text = 'Stuff '
+        child1.text = 'And Things'
+        extractor = ContentExtractor()
+        link_density = extractor.get_link_density(element)
+        self.assertEqual(link_density, len('And Things') / len('Stuff And Things'))
+
     def test_find_scoreable_elements_method_with_p_td_pre(self):
         """
         Test that <p>, <td> & <pre> elements are added (unmodified) to the list of scoreable elements.
@@ -76,8 +108,6 @@ class ContentExtractorTests(unittest.TestCase):
         extractor.score_elements(scoreable_elements)
 
         self.assertIsNone(scoreable_elements[0].get(extractor.DATA_CANIDATE_ATTR))
-        # print(etree.tostring(scoreable_elements[1],encoding='unicode'))
-        # print(etree.tostring(scoreable_elements[2],encoding='unicode'))
         self.assertEqual('true', scoreable_elements[1].get(extractor.DATA_CANIDATE_ATTR))
         self.assertEqual('true', scoreable_elements[2].get(extractor.DATA_CANIDATE_ATTR))
         self.assertEqual(2.75, float(scoreable_elements[1].get(extractor.CONTENT_SCORE_ATTR)))
