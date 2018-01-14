@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 import re
-from copy import deepcopy
 from io import StringIO
 
 from lxml import etree
@@ -57,6 +56,42 @@ class ContentExtractor(object):
         self.FLAG_STRIP_UNLIKELYS = True
         self.FLAG_WEIGHT_ATTRIBUTES = True
         self.FLAG_CLEAN_CONDITIONALLY = True
+
+    def _get_metadata_content(self, elem_tree, paths):
+        content = ''
+        for path in paths:
+            try:
+                content = elem_tree.find(path).get('content')
+                if content != '':
+                    break
+            except (KeyError, AttributeError):
+                continue
+        return content
+
+    def _get_front_image_url(self, elem_tree):
+        try:
+            return elem_tree.find('.//meta[@property=\'og:image\']').get('content')
+        except AttributeError:
+            return ''
+
+    def _get_canonical_url(self, elem_tree):
+        return elem_tree.find('.//link[@rel=\'canonical\']').get('href')
+
+    def extract_metadata(self, elem_tree):
+        # get title
+        title = elem_tree.findtext('.//title')
+        if title is None or title == '':
+            title = self._get_metadata_content(elem_tree, ['.//meta[@name=\'title\']', './/meta[@property=\'og:title\']'])
+        # get author
+        author = self._get_metadata_content(elem_tree, ['.//meta[@name=\'author\']', './/meta[@property=\'og:author\']'])
+        # get description
+        description = self._get_metadata_content(elem_tree, ['.//meta[@name=\'description\']', './/meta[@property=\'og:description\']'])
+        # get front image url
+        # front_image = elem_tree.find('.//meta[@property=\'og:image\']').get('content')
+        front_image = self._get_front_image_url(elem_tree)
+        # get canonical url
+        canonical_url = self._get_canonical_url(elem_tree)
+        return (title, author, description, front_image, canonical_url)
 
     def find_scoreable_elements(self, elem_tree):
         scoreable_elements = []
@@ -167,6 +202,8 @@ class ContentExtractor(object):
             elem_tree = etree.parse(StringIO(html), self.parser)
         else:
             return None
+
+        # extract metadata from <head>
 
         scoreable_elems = self.find_scoreable_elements(elem_tree)
         self.score_elements(scoreable_elems)

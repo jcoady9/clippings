@@ -43,6 +43,42 @@ class ContentExtractorTests(unittest.TestCase):
         link_density = extractor.get_link_density(element)
         self.assertEqual(link_density, len('And Things') / len('Stuff And Things'))
 
+    def test_extract_metadata(self):
+        trees = [
+            etree.HTML("""<head>
+                            <title>Title</title>
+                            <meta name=\"author\" content=\"Some Schmuck\">
+                            <meta name=\"description\" content=\"A description of the article\">
+                            <meta property=\"og:image\" content=\"http://images.stuff.net/image/url/here.jpg\">
+                            <link rel=\"canonical\" href=\"http://some/url/goes/here.html\">
+                          </head>"""),
+            etree.HTML("""<head>
+                            <meta name=\"title\" content=\"Title\">
+                            <meta name=\"author\" content=\"Some Schmuck\">
+                            <meta name=\"description\" content=\"A description of the article\">
+                            <meta property=\"og:image\" content=\"http://images.stuff.net/image/url/here.jpg\">
+                            <link rel=\"canonical\" href=\"http://some/url/goes/here.html\">
+                          </head>"""),
+            etree.HTML("""<head>
+                            <meta property=\"og:title\" content=\"Title\">
+                            <meta property=\"og:author\" content=\"Some Schmuck\">
+                            <meta property=\"og:description\" content=\"A description of the article\">
+                            <meta property=\"og:image\" content=\"http://images.stuff.net/image/url/here.jpg\">
+                            <link rel=\"canonical\" href=\"http://some/url/goes/here.html\">
+                          </head>"""),
+        ]
+
+        extractor = ContentExtractor()
+
+        for tree in trees:
+            head = tree.find('head')
+            (title, author, description, front_image_url, canonical_url) = extractor.extract_metadata(head)
+            self.assertEqual(title, 'Title')
+            self.assertEqual(author, 'Some Schmuck')
+            self.assertEqual(description, 'A description of the article')
+            self.assertEqual(front_image_url, 'http://images.stuff.net/image/url/here.jpg')
+            self.assertEqual(canonical_url, 'http://some/url/goes/here.html')
+
     def test_find_scoreable_elements_method_with_p_td_pre(self):
         """
         Test that <p>, <td> & <pre> elements are added (unmodified) to the list of scoreable elements.
