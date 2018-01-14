@@ -43,6 +43,16 @@ class ContentExtractorTests(unittest.TestCase):
         link_density = extractor.get_link_density(element)
         self.assertEqual(link_density, len('And Things') / len('Stuff And Things'))
 
+    def test_extract_metadata_method_without_metadata(self):
+        tree = etree.HTML("""<head></head>""")
+        extractor = ContentExtractor()
+        (title, author, description, front_image_url, canonical_url) = extractor.extract_metadata(tree.find('head'))
+        self.assertEqual(title, '')
+        self.assertEqual(author, '')
+        self.assertEqual(description, '')
+        self.assertEqual(front_image_url, '')
+        self.assertEqual(canonical_url, '')
+
     def test_extract_metadata(self):
         trees = [
             etree.HTML("""<head>

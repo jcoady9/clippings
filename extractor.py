@@ -75,7 +75,10 @@ class ContentExtractor(object):
             return ''
 
     def _get_canonical_url(self, elem_tree):
-        return elem_tree.find('.//link[@rel=\'canonical\']').get('href')
+        try:
+            return elem_tree.find('.//link[@rel=\'canonical\']').get('href')
+        except AttributeError:
+            return ''
 
     def extract_metadata(self, elem_tree):
         # get title
