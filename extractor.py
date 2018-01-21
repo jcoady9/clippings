@@ -22,6 +22,8 @@
 
 import re
 from io import StringIO
+from urllib.parse import urlparse, urlunparse
+# import html
 
 from lxml import etree
 
@@ -56,6 +58,7 @@ class ContentExtractor(object):
         self.FLAG_STRIP_UNLIKELYS = True
         self.FLAG_WEIGHT_ATTRIBUTES = True
         self.FLAG_CLEAN_CONDITIONALLY = True
+        self.url_hostname = ''
 
     def _get_metadata_content(self, elem_tree, paths):
         content = ''
@@ -94,6 +97,7 @@ class ContentExtractor(object):
         front_image = self._get_front_image_url(elem_tree)
         # get canonical url
         canonical_url = self._get_canonical_url(elem_tree)
+        self.url_hostname = '://'.join(urlparse(canonical_url)[0:1])
         return (title, author, description, front_image, canonical_url)
 
     def find_scoreable_elements(self, elem_tree):
@@ -198,6 +202,22 @@ class ContentExtractor(object):
             if elem.tag in self.JUNK_ELEMENTS:
                 parent = elem.getparent()
                 parent.remove(elem)
+
+        for elem in article_content.xpath('//*[@href]'):
+            url = urlparse(elem.get('href'))
+            if url[1] == '':
+                urlparts = list(url)
+                print(urlparts)
+                elem.set('href', self.url_hostname + urlparts[2])
+
+        for elem in article_content.xpath('//*[@src]'):
+            url = urlparse(elem.get('src'))
+            if url[1] == '':
+                elem.set('src', self.url_hostname + elem.get('src'))
+
+        # escape text to safe-html sequence
+        #html.escape()
+
         return
 
     def extract_content(self, html=None):

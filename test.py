@@ -221,5 +221,24 @@ class ContentExtractorTests(unittest.TestCase):
         for elem in element.iter():
             self.assertTrue(elem.tag not in extractor.JUNK_ELEMENTS)
 
+    def test_clean_article_content_add_hostname_to_href_and_src_attrs(self):
+        hostname = 'http://stuffandthings.net'
+        tree = etree.HTML("""
+            <div>
+                <img src="/thumbnail-image.jpg">
+                <a href="/another/page/on/the/site">A link goes here</a>
+            </div>
+        """)
+        extractor = ContentExtractor()
+        extractor.url_hostname = hostname
+
+        extractor.clean_article_content(tree)
+
+        print(etree.tostring(tree, encoding='unicode'))
+
+        self.assertTrue(tree.find('.//img').get('src').startswith(hostname))
+        self.assertTrue(tree.find('.//a').get('href').startswith(hostname))
+
+
 if __name__ == '__main__':
     unittest.main()
