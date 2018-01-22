@@ -1,5 +1,5 @@
 
-from extractor import ContentExtractor
+from clippings.extractor import ContentExtractor
 
 import unittest
 from io import StringIO
@@ -233,8 +233,6 @@ class ContentExtractorTests(unittest.TestCase):
         extractor.url_hostname = hostname
 
         extractor.clean_article_content(tree)
-
-        print(etree.tostring(tree, encoding='unicode'))
 
         self.assertTrue(tree.find('.//img').get('src').startswith(hostname))
         self.assertTrue(tree.find('.//a').get('href').startswith(hostname))

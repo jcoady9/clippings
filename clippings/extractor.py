@@ -97,7 +97,8 @@ class ContentExtractor(object):
         front_image = self._get_front_image_url(elem_tree)
         # get canonical url
         canonical_url = self._get_canonical_url(elem_tree)
-        self.url_hostname = '://'.join(urlparse(canonical_url)[0:1])
+        urlparts = urlparse(canonical_url)
+        self.url_hostname = urlparse(canonical_url)[0] + '://' + urlparse(canonical_url)[1]
         return (title, author, description, front_image, canonical_url)
 
     def find_scoreable_elements(self, elem_tree):
@@ -207,7 +208,6 @@ class ContentExtractor(object):
             url = urlparse(elem.get('href'))
             if url[1] == '':
                 urlparts = list(url)
-                print(urlparts)
                 elem.set('href', self.url_hostname + urlparts[2])
 
         for elem in article_content.xpath('//*[@src]'):
@@ -227,6 +227,7 @@ class ContentExtractor(object):
             return None
 
         # extract metadata from <head>
+        (title, author, description, front_image, canonical_url) = self.extract_metadata(elem_tree)
 
         scoreable_elems = self.find_scoreable_elements(elem_tree)
         self.score_elements(scoreable_elems)
