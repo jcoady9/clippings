@@ -6,19 +6,9 @@ Extract the interesting stuff from articles on the web minus the ads. This proje
 
 ## Installation
 
-I haven't written the setup.py for this project yet so for now you can add this package as a git submodule to your project.
-
 ```
 
-git clone https://github.com/jcoady9/clippings.git
-
-cd clippings
-
-pip install -r requirements.txt
-
-cd project
-
-git submodule add ../clippings
+python setup.py install
 
 ```
 
