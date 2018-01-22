@@ -8,6 +8,8 @@ Extract the interesting stuff from articles on the web minus the ads. This proje
 
 ```
 
+git clone https://github.com/jcoady9/clippings.git
+
 python setup.py install
 
 ```
