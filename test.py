@@ -27,6 +27,15 @@ class ContentExtractorTests(unittest.TestCase):
         inner_text = extractor.get_inner_text(element)
         self.assertEqual(inner_text, 'Stuff And Things')
 
+    def test_get_inner_text_with_grandchild_element_with_text(self):
+        element = etree.Element('p')
+        child1 = etree.SubElement(element, 'p')
+        grandchild1 = etree.SubElement(child1, 'a')
+        grandchild1.text = 'Stuff And Things'
+        extractor = ContentExtractor()
+        inner_text = extractor.get_inner_text(element)
+        self.assertEqual(inner_text, 'Stuff And Things')
+
     def test_get_link_density_without_text(self):
         element = etree.Element('p')
         child1 = etree.SubElement(element, 'a')

@@ -23,7 +23,6 @@
 import re
 from io import StringIO
 from urllib.parse import urlparse, urlunparse
-# import html
 
 from lxml import etree
 
@@ -85,7 +84,7 @@ class ContentExtractor(object):
 
     def extract_metadata(self, elem_tree):
         # get title
-        title = elem_tree.findtext('.//title')
+        title = elem_tree.findtext('title')
         if title is None or title == '':
             title = self._get_metadata_content(elem_tree, ['.//meta[@name=\'title\']', './/meta[@property=\'og:title\']'])
         # get author
@@ -124,7 +123,11 @@ class ContentExtractor(object):
         return scoreable_elements
 
     def get_inner_text(self, elem):
-        return ''.join([text for text in [elem.text] + [child.text for child in elem if child.text] if text is not None]).strip()
+        inner_text = ''
+        for child in elem.iter():
+            if child.text is not None:
+                inner_text += child.text
+        return inner_text.strip()
 
     def score_elements(self, scoreable_elems):
         for elem in scoreable_elems:
@@ -214,10 +217,6 @@ class ContentExtractor(object):
             url = urlparse(elem.get('src'))
             if url[1] == '':
                 elem.set('src', self.url_hostname + elem.get('src'))
-
-        # escape text to safe-html sequence
-        #html.escape()
-
         return
 
     def extract_content(self, html=None):
@@ -253,8 +252,7 @@ class ContentExtractor(object):
                 append = True
             if sibling.tag == 'p':
                 link_density = self.get_link_density(sibling)
-                content = sibling.text
-                content_length = len(content)
+                content_length = len(self.get_inner_text(sibling))
                 if (content_length > self.MIN_NODE_LENGTH and link_density < self.MAX_LINK_DENSITY) or (content_length < self.MIN_NODE_LENGTH and link_density == 0):
                     append = True
             if append:
