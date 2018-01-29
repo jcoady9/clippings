@@ -92,13 +92,22 @@ class ContentExtractor(object):
         # get description
         description = self._get_metadata_content(elem_tree, ['.//meta[@name=\'description\']', './/meta[@property=\'og:description\']'])
         # get front image url
-        # front_image = elem_tree.find('.//meta[@property=\'og:image\']').get('content')
         front_image = self._get_front_image_url(elem_tree)
         # get canonical url
         canonical_url = self._get_canonical_url(elem_tree)
         urlparts = urlparse(canonical_url)
         self.url_hostname = urlparse(canonical_url)[0] + '://' + urlparse(canonical_url)[1]
         return (title, author, description, front_image, canonical_url)
+
+    def extract_css(self, elem_tree):
+        # extract links to css
+        css_links = elem_tree.findall('.//link[@type=\'text/css\']')
+        # extract style elements
+        style_elems = elem_tree.findall('.//style')
+        css = list()
+        for style in css_links + style_elems:
+            css.append(etree.tostring(style, encoding='unicode').strip())
+        return ''.join(css)
 
     def find_scoreable_elements(self, elem_tree):
         scoreable_elements = []

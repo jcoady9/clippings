@@ -98,6 +98,23 @@ class ContentExtractorTests(unittest.TestCase):
             self.assertEqual(front_image_url, 'http://images.stuff.net/image/url/here.jpg')
             self.assertEqual(canonical_url, 'http://some/url/goes/here.html')
 
+    def test_extract_css_without_link_or_style_elements(self):
+        head = etree.HTML('<head></head>')
+        extractor = ContentExtractor()
+        css_results = extractor.extract_css(head)
+        self.assertEqual(css_results, '')
+
+    def test_extract_css_with_link_and_style_elements(self):
+        head = etree.HTML("""
+            <head>
+                <link rel=\"stylesheet\" type=\"text/css\"/>
+                <style>border: none;padding: 0;</style>
+            </head>
+        """)
+        extractor = ContentExtractor()
+        css_results = extractor.extract_css(head)
+        self.assertEqual(css_results, '<link rel=\"stylesheet\" type=\"text/css\"/><style>border: none;padding: 0;</style>')
+
     def test_find_scoreable_elements_method_with_p_td_pre(self):
         """
         Test that <p>, <td> & <pre> elements are added (unmodified) to the list of scoreable elements.
