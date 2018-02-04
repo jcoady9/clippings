@@ -20,22 +20,41 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .extractor import ContentExtractor
+class Article(object):
 
-class Clipper(object):
-    """
-    Parse article content from html.
-    """
+    def __init__(self, url=None, title=None, pub_date=None, author=None, content=None, description=None, front_image=None):
+        self._url = url
+        self._title = title
+        self._pub_date = pub_date
+        self._author = author
+        self._content = content
+        self._description = description
+        self._front_image = front_image
 
-    def __init__(self):
-        self.extractor = ContentExtractor()
+    @property
+    def url(self):
+        return self._url
 
-    def clip(self, html=None):
-        """
-        Parse for all the required information
-        """
-        if not html:
-            return None
-        self._html = html
+    @property
+    def title(self):
+        return self._title
 
-        return self.extractor.extract_content(html)
+    @property
+    def pub_date(self):
+        return self._pub_date
+
+    @property
+    def author(self):
+        return self._author
+
+    @property
+    def content(self):
+        return self._content
+
+    @property
+    def description(self):
+        return self._description
+
+    @property
+    def front_image(self):
+        return self._front_image

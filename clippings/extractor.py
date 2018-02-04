@@ -26,6 +26,8 @@ from urllib.parse import urlparse, urlunparse
 
 from lxml import etree
 
+from .article import Article
+
 class ContentExtractor(object):
 
     MAX_LINK_DENSITY = 0
@@ -286,4 +288,7 @@ class ContentExtractor(object):
         #         self.extract_content()
         #     else:
         #         return None
-        return etree.tostring(article_content, encoding='unicode')
+
+        article = Article(title=title,author=author,description=description,front_image=front_image,url=canonical_url,content=etree.tostring(article_content, encoding='unicode'))
+
+        return article
