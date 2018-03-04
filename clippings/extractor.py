@@ -167,7 +167,7 @@ class ContentExtractor(object):
         return
 
     def remove_unlikely_canidates(self, elem_tree):
-        for canidate in elem_tree.getroot().iter('footer', 'aside'):
+        for canidate in elem_tree.getroot().iter('footer', 'aside', 'script'):
             canidate.getparent().remove(canidate)
         potential_canidates = elem_tree.xpath('//body/*[(@class or @id or @style)]')
         for canidate in potential_canidates:
