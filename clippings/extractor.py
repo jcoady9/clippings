@@ -166,16 +166,15 @@ class ContentExtractor(object):
                 grand_parent.set(self.CONTENT_SCORE_ATTR, str(current_score + (content_score / 2.0)))
         return
 
-    def remove_unlikely_canidates(self):
-        for canidate in elem_tree.iter('footer', 'aside'):
-            if canidate.get(self.CONTENT_SCORE_ATTR) and canidate.get(self.CONTENT_SCORE_ATTR) < self.MIN_CONTENT_SCORE and canidate.tag != 'article':
-                canidate.getparent().remove(canidate)
-        potential_canidates = elem_tree.xpath('.//*[not(self::body) and (@class or @id or @style) and ((number(@score) < 40) or not(@score))]')
+    def remove_unlikely_canidates(self, elem_tree):
+        for canidate in elem_tree.getroot().iter('footer', 'aside'):
+            canidate.getparent().remove(canidate)
+        potential_canidates = elem_tree.xpath('//body/*[(@class or @id or @style)]')
         for canidate in potential_canidates:
-            attrs_str = ' '.join(canidate.get('class'), canidate.get('id'), canidate.get('style'))
+            attrs_str = ' '.join([canidate.get('class') or '', canidate.get('id') or '', canidate.get('style') or ''])
             unlikelys_regexp = re.compile(self.UNLIKELY_CANIDATES_PATTERN)
-            potentials_regexp = re.compile(self.POTENTIAL_CANIDATES_PATTERN)
-            if len(attrs_str) > 3 and unlikelys_regexp.search(attrs_str) and not potentials_regexp.match(attrs_str):
+            # potentials_regexp = re.compile(self.POTENTIAL_CANIDATES_PATTERN)
+            if len(attrs_str) > 3 and unlikelys_regexp.search(attrs_str):
                 canidate.getparent().remove(canidate)
         return
 
@@ -242,8 +241,8 @@ class ContentExtractor(object):
         scoreable_elems = self.find_scoreable_elements(elem_tree)
         self.score_elements(scoreable_elems)
         # TODO: Implement below code
-        # if self.FLAG_STRIP_UNLIKELYS:
-        #     self.remove_unlikely_canidates()
+        if self.FLAG_STRIP_UNLIKELYS:
+            self.remove_unlikely_canidates(elem_tree)
         top_canidate = self.find_top_canidate(elem_tree)
 
         top_canidate_score = float(top_canidate.get(self.CONTENT_SCORE_ATTR))
@@ -251,7 +250,11 @@ class ContentExtractor(object):
         article_content = etree.Element('div')
         article_content.set('class', 'clippings-content')
         sibling_score_threshold = max(10, top_canidate_score * 0.2)
-        siblings = list(top_canidate.getparent())
+        # FIXME: NoneType cannot iterate
+        if top_canidate.getparent():
+            siblings = list(top_canidate.getparent())
+        else:
+            siblings = [top_canidate]
         for sibling in siblings:
             append = False
             if sibling == top_canidate:
@@ -289,6 +292,6 @@ class ContentExtractor(object):
         #     else:
         #         return None
 
-        article = Article(title=title,author=author,description=description,front_image=front_image,url=canonical_url,content=etree.tostring(article_content, encoding='unicode'))
+        article = Article(title=title,author=author,description=description,front_image=front_image,url=canonical_url,content=etree.tostring(article_content, encoding='unicode', method='html'))
 
         return article
