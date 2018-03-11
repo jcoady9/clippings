@@ -22,7 +22,7 @@
 
 class Article(object):
 
-    def __init__(self, url=None, title=None, pub_date=None, author=None, content=None, description=None, front_image=None):
+    def __init__(self, url=None, title=None, pub_date=None, author=None, content=None, description=None, front_image=None, style=None):
         self._url = url
         self._title = title
         self._pub_date = pub_date
@@ -30,6 +30,7 @@ class Article(object):
         self._content = content
         self._description = description
         self._front_image = front_image
+        self._style = style
 
     @property
     def url(self):
@@ -58,3 +59,7 @@ class Article(object):
     @property
     def front_image(self):
         return self._front_image
+
+    @property
+    def style(self):
+        return self._style

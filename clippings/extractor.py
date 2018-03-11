@@ -237,6 +237,7 @@ class ContentExtractor(object):
 
         # extract metadata from <head>
         (title, author, description, front_image, canonical_url) = self.extract_metadata(elem_tree)
+        style = self.extract_css(elem_tree)
 
         scoreable_elems = self.find_scoreable_elements(elem_tree)
         self.score_elements(scoreable_elems)
@@ -292,6 +293,14 @@ class ContentExtractor(object):
         #     else:
         #         return None
 
-        article = Article(title=title,author=author,description=description,front_image=front_image,url=canonical_url,content=etree.tostring(article_content, encoding='unicode', method='html'))
+        article = Article(
+            title=title,
+            author=author,
+            description=description,
+            front_image=front_image,
+            url=canonical_url,
+            content=etree.tostring(article_content, encoding='unicode', method='html'),
+            style=style
+        )
 
         return article
