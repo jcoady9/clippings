@@ -36,6 +36,5 @@ class Clipper(object):
         """
         if not html:
             return None
-        self._html = html
 
         return self.extractor.extract_content(html)

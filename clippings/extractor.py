@@ -45,7 +45,7 @@ class ContentExtractor(object):
     JUNK_ELEMENTS = ['input', 'button', 'nav', 'object', 'canvas']
     DIV_TO_P_ELEMENTS_PATTERN = r'.<(?:blockquote|header|section|code|div|article|footer|aside|img|p|pre|dl|ol|ul)'
     DIV_TO_P_ELEMENTS_LIST = ['blockquote', 'header', 'section', 'code', 'div', 'article', 'footer', 'aside', 'img', 'p', 'pre', 'dl', 'ol', 'ul']
-    UNLIKELY_CANIDATES_PATTERN = r'display\s*:\s*none|ignore|\binfos?\b|annoy|clock|date|time|author|intro|hidd?e|about|archive|\bprint|bookmark|tags|tag-list|share|search|social|robot|published|combx|comment|mast(?:head)|subscri|community|category|disqus|extra|head|head(?:er|note)|floor|foot(?:er|note)|menu|tool\b|function|nav|remark|rss|shoutbox|widget|meta|banner|sponsor|adsense|inner-?ad|ad-|sponsor|\badv\b|\bads\b|agr?egate?|pager|sidebar|popup|tweet|twitter'
+    UNLIKELY_CANIDATES_PATTERN = r'(\b|\s|-)(about|ad|ads|adsense|adv|agregate|annoy|archive|aside|author|bookmark|category|clock|combx|comment|community|date|display|disqus|extra|floor|footer|form|function|head(er)?|hidden|ignore|infos|intro|masthead|menu|meta|nav|newsletter|pager|popup|print|published|remark|robot|rss|search|share|shoutbox|sidebar|social|sponsor|subscribe|tag-list|tags|time|tool|tweet|twitter|widget)(\b|\s|-)'
     POTENTIAL_CANIDATES_PATTERN = r'article\b|contain|\bcontent|column|general|detail|shadow|lightbox|blog|body|entry|main|page'
 
     MIN_ARTICLE_LENGTH = 100
@@ -167,12 +167,12 @@ class ContentExtractor(object):
         return
 
     def remove_unlikely_canidates(self, elem_tree):
-        for canidate in elem_tree.getroot().iter('footer', 'aside', 'script'):
+        for canidate in elem_tree.getroot().iter('footer', 'aside', 'script', 'form'):
             canidate.getparent().remove(canidate)
-        potential_canidates = elem_tree.xpath('//body/*[(@class or @id or @style)]')
+        potential_canidates = elem_tree.xpath('//body//*[(@class or @id or @style)]')
         for canidate in potential_canidates:
             attrs_str = ' '.join([canidate.get('class') or '', canidate.get('id') or '', canidate.get('style') or ''])
-            unlikelys_regexp = re.compile(self.UNLIKELY_CANIDATES_PATTERN)
+            unlikelys_regexp = re.compile(self.UNLIKELY_CANIDATES_PATTERN, re.I)
             # potentials_regexp = re.compile(self.POTENTIAL_CANIDATES_PATTERN)
             if len(attrs_str) > 3 and unlikelys_regexp.search(attrs_str):
                 canidate.getparent().remove(canidate)
