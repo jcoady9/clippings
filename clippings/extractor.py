@@ -55,7 +55,7 @@ class ContentExtractor(object):
 
 
     def __init__(self):
-        self.parser = etree.HTMLParser(remove_blank_text=True)
+        self.parser = etree.HTMLParser(remove_blank_text=True, remove_comments=True)
         self.FLAG_STRIP_UNLIKELYS = True
         self.FLAG_WEIGHT_ATTRIBUTES = True
         self.FLAG_CLEAN_CONDITIONALLY = True
