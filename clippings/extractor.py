@@ -204,6 +204,9 @@ class ContentExtractor(object):
                 top_canidate = top_canidate.getparent()
         return top_canidate
 
+    def pre_clean(self, html):
+        return re.sub(r'(<br>){2,}','<br>',html,flags=re.I|re.DEBUG)
+
     def clean_article_content(self, article_content):
         for elem in article_content.iter():
             attributes = elem.attrib
@@ -299,7 +302,7 @@ class ContentExtractor(object):
             description=description,
             front_image=front_image,
             url=canonical_url,
-            content=etree.tostring(article_content, encoding='unicode', method='html'),
+            content=etree.tostring(article_content, encoding='unicode', method='html').replace('\n', ''),
             style=style
         )
 
