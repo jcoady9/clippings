@@ -205,7 +205,7 @@ class ContentExtractor(object):
         return top_canidate
 
     def pre_clean(self, html):
-        return re.sub(r'(<br>){2,}','<br>',html,flags=re.I|re.DEBUG)
+        return re.sub(r'(<br>[ \s\w]*){2,}','<br>',html,flags=re.I|re.S)
 
     def clean_article_content(self, article_content):
         for elem in article_content.iter():
@@ -234,7 +234,8 @@ class ContentExtractor(object):
 
     def extract_content(self, html=None):
         if html:
-            elem_tree = etree.parse(StringIO(html), self.parser)
+            cleaned_html = self.pre_clean(html)
+            elem_tree = etree.parse(StringIO(cleaned_html), self.parser)
         else:
             return None
 

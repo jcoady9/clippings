@@ -264,7 +264,11 @@ class ContentExtractorTests(unittest.TestCase):
         self.assertTrue(tree.find('.//a').get('href').startswith(hostname))
 
     def test_pre_clean_method_removes_excessive_br_elements(self):
-        html = '<br><br><br><br>'
+        html = """<br>
+                <br>
+                <br>
+                <br>
+        """
         extractor = ContentExtractor()
         cleaned_html = extractor.pre_clean(html)
         self.assertEqual(cleaned_html, '<br>')
